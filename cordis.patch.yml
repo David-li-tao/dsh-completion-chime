@@ -1,0 +1,3 @@
+- insert:
+    - id: completion-chime
+      name: 'dsh-completion-chime'

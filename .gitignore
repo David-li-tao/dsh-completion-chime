@@ -1,0 +1,9 @@
+node_modules/
+*.log
+
+# Never commit third-party recordings. Rings you add belong in
+# ~/.dsh/completion-chime/sounds/, outside this repository.
+assets/*.wav
+!assets/complete.wav
+!assets/soft.wav
+!assets/rise.wav

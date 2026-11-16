@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "title": "Completion chime",
+    "description": "Rings a short chime and pops a small card in the top-right corner when a turn finishes, with the duration, turn number and the opening line of the reply. Bring your own rings: drop a wav into ~/.dsh/completion-chime/sounds/ and manage them with /chime list, use and volume; rings rotate at random and never repeat back to back. Subagent turns and turns you cancelled stay silent.",
+    "detail": "docs/DETAIL.md"
+  }
+}
