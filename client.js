@@ -237,7 +237,7 @@ window.__ModuleLoader__.load({
           h(
             'div',
             { className: 'dsh-cn-head' },
-            h('div', { className: 'dsh-cn-title' }, copy[kind]),
+            h('div', { className: 'dsh-cn-title' }, item.title ? String(item.title) : copy[kind]),
             meta ? h('div', { className: 'dsh-cn-meta', title: meta }, meta) : null,
           ),
           excerpt ? h('div', { className: 'dsh-cn-excerpt' }, excerpt) : null,

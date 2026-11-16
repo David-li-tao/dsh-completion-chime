@@ -50,9 +50,37 @@ the plugin never touches that folder.
 | `/chime off` / `/chime on` | Mute/unmute the ring; the card stays |
 | `/chime dir` | Print the folder for your own rings |
 | `/notice` | Preview the card without waiting for a turn |
+| `/notice 构建完成，用时 3 分` | Preview the card with your own body text |
 
 Preferences are written to `~/.dsh/completion-chime/config.json`, next to your
 rings — not into the plugin, so updates keep them.
+
+## Let an agent raise the notice
+
+The plugin registers a global tool named **`notify`**, so *any* agent — your
+own conversation, a subagent, a scheduled session, another preset — can ask for
+the user's attention on purpose instead of waiting for a turn to end:
+
+```jsonc
+notify({
+  "title": "导出完成",              // short headline, defaults to 「任务完成」
+  "text": "128 个文件已导出到默认工作区。", // one or two sentences
+  "kind": "done",                 // "done" = green rail, "error" = red
+  "sound": "home",                // optional; omit to use the user's rotation
+  "ring": true                    // optional; false = card only
+})
+```
+
+The call returns `{ shown, sound }`. The card lands in the same place as a
+turn-end notice, and the ring respects the user's mute/volume settings.
+
+Guidance encoded in the tool description (which is what other models read):
+call it when the user genuinely needs to come back — a long job finished, a
+background task settled, an external event needs a decision. Never as a
+substitute for replying, and never when the user just interrupted you.
+
+Turn-end notices are still filtered to your own conversation by default. Set
+`includeSubagents: true` to be told about subagent turns too.
 
 ## Configuration
 
@@ -67,6 +95,8 @@ set there wins over the defaults:
 | `sound` | `true` | Play the ring |
 | `onError` | `true` | Also notify when a turn dies with an error |
 | `onBlocked` | `false` | Also notify when a turn is blocked |
+| `includeSubagents` | `false` | Also notify for subagent turns |
+| `agentTool` | `true` | Register the `notify` tool for every agent |
 | `coalesceMs` | `800` | Collapse endings this close together |
 | `excerptChars` | `90` | Characters of the reply on the card; `0` hides it |
 | `file` | `''` | Absolute WAV path; wins over `soundName` |

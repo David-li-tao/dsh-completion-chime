@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Completion chime",
-    "description": "Rings a short chime and pops a small card in the top-right corner when a turn finishes, with the duration, turn number and the opening line of the reply. Bring your own rings: drop a wav into ~/.dsh/completion-chime/sounds/ and manage them with /chime list, use and volume; rings rotate at random and never repeat back to back. Subagent turns and turns you cancelled stay silent.",
+    "description": "Rings a short chime and pops a small card in the top-right corner when a turn finishes, with the duration, turn number and the opening line of the reply. Any agent can also raise one on purpose through the `notify` tool: a long job finished, a background task settled, an external event that needs a decision. Bring your own rings: drop a wav into ~/.dsh/completion-chime/sounds/ and manage them with /chime list, use and volume; rings rotate at random and never repeat back to back. Subagent turns and turns you cancelled stay silent by default.",
     "detail": "docs/DETAIL.md"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "dsh-completion-chime",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Rings a chime and pops a card when your turn finishes. Bring your own rings.",
   "license": "MIT",
   "author": "李桂宁",
@@ -41,7 +41,9 @@
     "toast"
   ],
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "platform": "web",
       "immediately": true

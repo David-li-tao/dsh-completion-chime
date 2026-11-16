@@ -45,6 +45,10 @@ const DEFAULTS = {
   onError: true,
   /** Notify when a turn is blocked (for example by a refused approval). */
   onBlocked: false,
+  /** Also notify for subagent turns, not just your own conversation. */
+  includeSubagents: false,
+  /** Expose the `notify` tool so any agent can raise a notice on purpose. */
+  agentTool: true,
   /** Collapse several turns ending this close together into one notice, ms. */
   coalesceMs: 800,
   /** Characters of the reply carried into the card; 0 turns the excerpt off. */
@@ -176,22 +180,39 @@ export function apply(ctx, config) {
       turn: typeof event?.data?.turn === 'number' ? event.data.turn : 0,
       durationMs: extra?.durationMs ?? 0,
       excerpt: extra?.excerpt ?? '',
+      title: extra?.title ?? '',
     }
     notices.push(notice)
     if (notices.length > MAX_KEPT) notices.splice(0, notices.length - MAX_KEPT)
     return notice
   }
 
+  function ring() {
+    if (state.sound) playChime({ sound: pickSound(state.soundName), file: state.file, volume: state.volume })
+    return state.sound ? 'on' : 'off'
+  }
+
   function notify(kind, session, event, extra) {
     if (options.popup) remember(kind, session, event, extra)
-    if (state.sound) playChime({ sound: pickSound(state.soundName), file: state.file, volume: state.volume })
+    ring()
+  }
+
+  /**
+   * A notice raised on purpose — by the `notify` tool or by `/notice` — rather
+   * than by a turn ending. Returns the ring that was used, or '' when silent.
+   */
+  function raise({ kind = 'completed', title = '', text = '', sound = '', ring: shouldRing = true } = {}) {
+    if (options.popup) remember(kind, undefined, undefined, { title, excerpt: text })
+    if (!shouldRing || !state.sound) return ''
+    const named = sound && listRings().some((entry) => entry.name === sound) ? sound : pickSound(state.soundName)
+    playChime({ sound: named, file: state.file, volume: state.volume })
+    return named
   }
 
   ctx.on('session/event', (session, event) => {
     // Delegated children end turns constantly; only the user's own conversation
-    // is worth an interruption, and skipping them here also keeps the scratch
-    // maps from filling with subagent sessions.
-    if (session.header.origin === 'subagent') return
+    // is worth an interruption unless the profile asks for every session.
+    if (session.header.origin === 'subagent' && !options.includeSubagents) return
     const type = event?.type
 
     if (type === 'turn/start') {
@@ -222,6 +243,60 @@ export function apply(ctx, config) {
       excerpt,
     })
   })
+
+  // Any Agent may raise a notice on purpose — a long job it started, an event
+  // it was watching. Registered globally, so subagents and scheduled sessions
+  // get it too, not only the user's own conversation.
+  if (options.agentTool) {
+    ctx.inject(['tools'], (toolCtx) => {
+      const tools = toolCtx.get('tools')
+      toolCtx.effect(() =>
+        tools.register({
+          name: 'notify',
+          description:
+            '向用户发一条完成提示：右上角弹出卡片，并按用户当前设置响一声。用在你确实需要用户回来看一眼的时候——长任务收尾、后台作业完成、需要用户决策的外部事件。普通对话回复不要调用，用户主动打断你时也不要调用。卡片内容用户会直接看到，写清楚「完成了什么」即可，不要复述整篇回答。',
+          parameters: {
+            type: 'object',
+            additionalProperties: false,
+            properties: {
+              title: { type: 'string', description: '卡片标题，短一些，例如「导出完成」。省略则显示「任务完成」。' },
+              text: { type: 'string', description: '卡片正文，一两句话。省略则不显示正文。' },
+              kind: { type: 'string', enum: ['done', 'error'], description: 'done = 绿条（默认），error = 红条。' },
+              sound: { type: 'string', description: '指定铃声名（`/chime list` 可查）。省略则按用户当前轮换随机。' },
+              ring: { type: 'boolean', description: '是否响铃，默认 true。用户关掉提示音时不会响。' },
+            },
+          },
+          output: {
+            schema: {
+              type: 'object',
+              additionalProperties: false,
+              properties: { shown: { type: 'boolean' }, sound: { type: 'string' } },
+            },
+            render: (_args, value) => [
+              {
+                type: 'text',
+                text: value?.shown
+                  ? `已弹出提示卡片${value.sound ? `，铃声 ${value.sound}` : '（未响铃）'}。不要向用户复述这张卡片。`
+                  : '用户关闭了提示卡片；本次未显示。',
+              },
+            ],
+          },
+          execute: async (args) => {
+            const input = args && typeof args === 'object' ? args : {}
+            const sound = raise({
+              kind: input.kind === 'error' ? 'error' : 'completed',
+              title: typeof input.title === 'string' ? input.title : '',
+              text: typeof input.text === 'string' ? input.text : '',
+              sound: typeof input.sound === 'string' ? input.sound : '',
+              ring: input.ring !== false,
+            })
+            return { shown: options.popup !== false, sound }
+          },
+          isConcurrencySafe: () => true,
+        }),
+      )
+    })
+  }
 
   // The Client half holds no session state: it asks for notices newer than the
   // last cursor it saw. A first request without `since` only learns the cursor,
@@ -262,18 +337,15 @@ export function apply(ctx, config) {
     cmdCtx.effect(() =>
       commands.register({
         name: 'notice',
-        description: '弹出一个完成提示小窗（试看）',
-        handler: () => {
-          notify(
-            'completed',
-            { header: {} },
-            { data: { turn: 0 } },
-            {
-              durationMs: 187000,
-              excerpt: '这是一张试用卡片：任务结束时它会带着用时、轮次和最后一句话出现。',
-            },
-          )
-          return { kind: 'success', text: options.popup ? '小窗已弹出' : '弹窗已关闭（config.popup = false）' }
+        description: '弹出一个提示小窗（试看）。可带正文：/notice 导出完成了，共 128 个文件',
+        handler: (invocation) => {
+          const raw = typeof invocation?.rawInput === 'string' ? invocation.rawInput.trim() : ''
+          const text = raw || '这是一张试用卡片：任务结束时它会带着用时、轮次和最后一句话出现。'
+          const sound = raise({ kind: 'completed', text })
+          return {
+            kind: 'success',
+            text: options.popup ? `小窗已弹出${sound ? `（${sound}）` : ''}` : '弹窗已关闭（config.popup = false）',
+          }
         },
       }),
     )

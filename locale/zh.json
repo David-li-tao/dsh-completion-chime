@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "完成弹窗提示",
-    "description": "每一轮任务结束时，响一声提示音并在窗口右上角弹出一张小卡片（用时、轮次、回复开头）。提示音可自定义：把 wav 放进 ~/.dsh/completion-chime/sounds/，用 /chime list / use / volume 管理，随机轮换且不连续重复。子任务和你手动打断的轮次不打扰。",
+    "description": "每一轮任务结束时，响一声提示音并在窗口右上角弹出一张小卡片（用时、轮次、回复开头）。任何 agent 也能主动调用 notify 工具提醒你：长任务收尾、后台作业完成、需要你决策的外部事件。提示音可自定义：把 wav 放进 ~/.dsh/completion-chime/sounds/，用 /chime list / use / volume 管理，随机轮换且不连续重复。子任务和你手动打断的轮次默认不打扰。",
     "detail": "docs/DETAIL.md"
   }
 }
