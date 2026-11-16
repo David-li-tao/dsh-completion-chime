@@ -55,6 +55,19 @@ the plugin never touches that folder.
 Preferences are written to `~/.dsh/completion-chime/config.json`, next to your
 rings — not into the plugin, so updates keep them.
 
+## Card skins
+
+Two skins ship, and each notice picks one at random — never the same one twice
+in a row:
+
+- **ink** — rice paper: warm gradient, faint fibre noise, one vermilion seal
+  stamped with 成 / 误 / 待 / 断 / 止, serif headline, generous leading.
+- **taiji** — one monochrome card with a yin-yang mark. An error flips it inside
+  out: dark ground, light ink.
+
+Set `cardStyles: ['ink']` (or `['taiji']`) to pin a single skin; unknown names
+fall back to `ink`.
+
 ## Let an agent raise the notice
 
 The plugin registers a global tool named **`notify`**, so *any* agent — your
@@ -98,6 +111,7 @@ set there wins over the defaults:
 | `includeSubagents` | `false` | Also notify for subagent turns |
 | `agentTool` | `true` | Register the `notify` tool for every agent |
 | `coalesceMs` | `800` | Collapse endings this close together |
+| `cardStyles` | `['ink','taiji']` | Card skins, one picked per notice, never the same twice in a row |
 | `excerptChars` | `90` | Characters of the reply on the card; `0` hides it |
 | `file` | `''` | Absolute WAV path; wins over `soundName` |
 

@@ -67,56 +67,148 @@ window.__ModuleLoader__.load({
       unknown: 'idle',
     }
 
+    /** One character per ending, stamped like a seal on the ink card. */
+    const SEAL = {
+      completed: '成',
+      error: '误',
+      blocked: '待',
+      'max-tokens': '断',
+      unknown: '止',
+    }
+
     const STYLE = [
       '.dsh-cn-stack{position:fixed;top:52px;right:18px;z-index:60;display:flex;flex-direction:column;',
-      'gap:8px;width:340px;max-width:calc(100vw - 36px);pointer-events:none;font-family:inherit}',
-      '.dsh-cn-card{pointer-events:auto;position:relative;display:flex;align-items:flex-start;',
-      'box-sizing:border-box;padding:13px 14px 13px 15px;border-radius:12px;',
-      'border:1px solid var(--dsw-alias-border-l1);',
+      'gap:9px;width:336px;max-width:calc(100vw - 36px);pointer-events:none;font-family:inherit}',
+      '.dsh-cn-card{pointer-events:auto;position:relative;box-sizing:border-box;display:flex;align-items:flex-start;',
+      'padding:14px 15px 15px;border-radius:14px;',
       // The theme's surface tokens are alpha layers meant to sit on a page, so a
       // single one leaves the transcript showing through the card. Stack the same
-      // layer three times (each pass raises opacity) and frost what is left, so
-      // the card reads as a surface instead of a smudge.
+      // layer three times (each pass raises opacity) and frost what is left.
       'background-color:var(--dsw-alias-bg-overlay,rgba(24,24,27,.9));',
       'background-image:linear-gradient(var(--dsw-alias-bg-overlay,rgba(0,0,0,0)),var(--dsw-alias-bg-overlay,rgba(0,0,0,0))),',
       'linear-gradient(var(--dsw-alias-bg-overlay,rgba(0,0,0,0)),var(--dsw-alias-bg-overlay,rgba(0,0,0,0)));',
-      'backdrop-filter:blur(24px) saturate(1.2);-webkit-backdrop-filter:blur(24px) saturate(1.2);',
-      'color:var(--dsw-alias-label-primary);font-size:13px;line-height:1.35;',
-      'box-shadow:0 16px 36px -20px rgba(0,0,0,.5),0 2px 6px rgba(0,0,0,.1),inset 0 1px 0 rgba(255,255,255,.06);',
-      'animation:dsh-cn-in .22s cubic-bezier(.22,.68,.32,1) both;',
-      'transition:box-shadow .16s ease,border-color .16s ease}',
-      '.dsh-cn-card:hover{border-color:var(--dsw-alias-border-l2);',
-      'box-shadow:0 18px 40px -20px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.08)}',
-      // The tone lives in one solid rail down the left edge: you read the
-      // outcome from the color before you read the words.
-      '.dsh-cn-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;',
-      'background:var(--dsh-cn-accent,var(--dsw-alias-brand-primary));border-radius:12px 0 0 12px}',
+      'backdrop-filter:blur(28px) saturate(1.15);-webkit-backdrop-filter:blur(28px) saturate(1.15);',
+      // A hairline that is mostly an inner highlight: the edge should catch the
+      // light, not draw a box.
+      'box-shadow:0 1px 1px rgba(0,0,0,.10),0 2px 6px rgba(0,0,0,.10),',
+      '0 20px 44px -18px rgba(0,0,0,.46),inset 0 0 0 1px rgba(255,255,255,.055),inset 0 1px 0 rgba(255,255,255,.07);',
+      'color:var(--dsw-alias-label-primary);font-size:13px;line-height:1.45;',
+      'animation:dsh-cn-in .19s cubic-bezier(.2,.75,.3,1) both;',
+      'transition:box-shadow .18s ease}',
+      '.dsh-cn-card:hover{box-shadow:0 1px 1px rgba(0,0,0,.10),0 3px 8px rgba(0,0,0,.12),',
+      '0 24px 52px -18px rgba(0,0,0,.52),inset 0 0 0 1px rgba(255,255,255,.075),inset 0 1px 0 rgba(255,255,255,.09)}',
       '.dsh-cn-body{flex:1 1 auto;min-width:0}',
-      // Title and the small print share one baseline row: the eye reads the
-      // headline first, the numbers sit out of the way on the right instead of
-      // stacking a second full-width line under it.
       '.dsh-cn-head{display:flex;align-items:baseline;gap:8px;min-width:0}',
+      // One 5px dot carries the outcome. A full-height colour bar reads as a
+      // system banner; a dot reads as a considered detail.
+      '.dsh-cn-dot{flex:none;width:5px;height:5px;border-radius:50%;margin-right:1px;',
+      'background:var(--dsh-cn-accent,var(--dsw-alias-brand-primary));',
+      'box-shadow:0 0 0 3px rgba(255,255,255,.035);transform:translateY(-2px)}',
       '.dsh-cn-title{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;',
-      'font-weight:600;letter-spacing:.005em}',
-      '.dsh-cn-meta{margin-left:auto;flex:0 1 auto;min-width:0;max-width:62%;text-align:right;',
-      'color:var(--dsw-alias-label-tertiary);font-size:11.5px;line-height:1.3;',
-      'white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
-      '.dsh-cn-excerpt{margin-top:6px;color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.5;',
+      'font-weight:600;letter-spacing:.012em}',
+      '.dsh-cn-meta{margin-left:auto;flex:0 1 auto;min-width:0;max-width:60%;text-align:right;',
+      'color:var(--dsw-alias-label-tertiary);font-size:11px;letter-spacing:.01em;line-height:1.35;',
+      'font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+      '.dsh-cn-excerpt{margin-top:7px;color:var(--dsw-alias-label-secondary);font-size:12.5px;',
+      'line-height:1.65;letter-spacing:.005em;opacity:.92;',
       'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word}',
-      '.dsh-cn-close{position:absolute;top:8px;right:8px;width:20px;height:20px;padding:0;border:0;border-radius:6px;',
-      'background:transparent;color:var(--dsw-alias-label-tertiary);font-size:14px;line-height:1;',
+      '.dsh-cn-close{position:absolute;top:9px;right:9px;width:18px;height:18px;padding:0;border:0;border-radius:5px;',
+      'background:transparent;color:var(--dsw-alias-label-tertiary);font-size:13px;line-height:1;',
       'cursor:pointer;opacity:0;transition:opacity .15s ease,background .15s ease,color .15s ease}',
-      '.dsh-cn-card:hover .dsh-cn-close,.dsh-cn-close:focus-visible{opacity:1}',
-      '.dsh-cn-close:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}',
+      '.dsh-cn-card:hover .dsh-cn-close,.dsh-cn-close:focus-visible{opacity:.85}',
+      '.dsh-cn-close:hover{background:rgba(255,255,255,.08);color:var(--dsw-alias-label-primary);opacity:1}',
       '.dsh-cn-card[data-tone="success"]{--dsh-cn-accent:var(--dsw-alias-state-success-primary)}',
       '.dsh-cn-card[data-tone="warn"]{--dsh-cn-accent:var(--dsw-alias-state-warn-primary)}',
       '.dsh-cn-card[data-tone="error"]{--dsh-cn-accent:var(--dsw-alias-state-error-primary)}',
       '.dsh-cn-card[data-tone="idle"]{--dsh-cn-accent:var(--dsw-alias-state-idle-primary)}',
+      // ── 水墨 ink card ───────────────────────────────────────────────────────
+      // Rice paper, ink type and one vermilion seal. The paper is drawn rather
+      // than tinted: a warm gradient, a faint fibre noise, and a hairline rule
+      // under the headline. Serif is used only where it reads at this size.
+      '.dsh-cn-seal{display:none}',
+      '.dsh-cn-card.dsh-cn-ink{width:328px;padding:15px 16px 16px;border-radius:8px;',
+      'background-color:#f5efe2;',
+      'background-image:url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'160\' height=\'160\'><filter id=\'n\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'3\'/><feColorMatrix type=\'saturate\' values=\'0\'/></filter><rect width=\'160\' height=\'160\' filter=\'url(%23n)\' opacity=\'0.045\'/></svg>"),',
+      'linear-gradient(158deg,#faf6ec,#f2e9d8 58%,#eadfcb);',
+      'backdrop-filter:none;-webkit-backdrop-filter:none;',
+      'box-shadow:inset 0 0 0 1px rgba(74,58,40,.10),inset 0 1px 0 rgba(255,255,255,.7),',
+      '0 2px 5px rgba(52,38,22,.10),0 16px 38px -18px rgba(52,38,22,.44);',
+      'color:#241f1a;animation:dsh-cn-in .26s cubic-bezier(.2,.75,.3,1) both}',
+      '.dsh-cn-ink .dsh-cn-head{align-items:center;gap:9px;padding-bottom:9px;',
+      'border-bottom:1px solid;border-image:linear-gradient(90deg,rgba(60,48,34,.26),rgba(60,48,34,.06) 58%,transparent) 1}',
+      '.dsh-cn-ink .dsh-cn-dot{display:none}',
+      '.dsh-cn-ink .dsh-cn-seal{display:flex;flex:none;align-items:center;justify-content:center;',
+      'width:21px;height:21px;border-radius:3px;background:#a8382c;color:#f8f1e2;',
+      'font-size:11.5px;line-height:1;font-family:"Songti SC","STSong","SimSun",serif;',
+      'transform:rotate(-3deg);box-shadow:0 1px 2px rgba(90,40,30,.35),inset 0 0 0 1px rgba(255,236,214,.22)}',
+      '.dsh-cn-ink .dsh-cn-title{font-family:"Songti SC","STSong","SimSun","Noto Serif SC",serif;',
+      'font-size:14px;font-weight:600;letter-spacing:.05em;color:#211c17}',
+      '.dsh-cn-ink .dsh-cn-meta{color:#8b7d6b;font-size:10.5px;letter-spacing:.03em}',
+      '.dsh-cn-ink .dsh-cn-excerpt{margin-top:10px;color:#564d44;font-size:12.5px;line-height:1.8;opacity:1}',
+      '.dsh-cn-ink .dsh-cn-close{top:7px;right:7px;color:#8b7d6b}',
+      '.dsh-cn-ink .dsh-cn-close:hover{background:rgba(70,56,40,.10);color:#3a322a}',
+      '.dsh-cn-ink[data-leaving="1"]{animation:dsh-cn-out .2s ease forwards}',
+      // ── 太极 taiji: one monochrome card, and an error flips yin and yang ───
+      '.dsh-cn-glyph{display:none}',
+      '.dsh-cn-card.dsh-cn-taiji{--dsh-cn-inkc:#0f0f11;--dsh-cn-paperc:#fbfaf6;',
+      'width:330px;padding:14px 16px 15px;border-radius:10px;',
+      'background:var(--dsh-cn-paperc);color:var(--dsh-cn-inkc);',
+      'backdrop-filter:none;-webkit-backdrop-filter:none;',
+      'box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.85),',
+      '0 2px 6px rgba(0,0,0,.10),0 18px 40px -18px rgba(0,0,0,.46);',
+      'animation:dsh-cn-in .22s cubic-bezier(.2,.75,.3,1) both}',
+      '.dsh-cn-taiji .dsh-cn-head{align-items:center;gap:9px;padding-bottom:9px;',
+      'border-bottom:1px solid rgba(0,0,0,.10)}',
+      '.dsh-cn-taiji .dsh-cn-dot{display:none}',
+      '.dsh-cn-taiji .dsh-cn-glyph{display:flex;flex:none;width:20px;height:20px}',
+      '.dsh-cn-taiji .dsh-cn-glyph svg{display:block;width:20px;height:20px}',
+      '.dsh-cn-taiji .dsh-cn-title{font-size:13.5px;font-weight:600;letter-spacing:.02em;',
+      'color:var(--dsh-cn-inkc)}',
+      '.dsh-cn-taiji .dsh-cn-meta{color:#6f6f70;font-size:10.5px;letter-spacing:.02em}',
+      '.dsh-cn-taiji .dsh-cn-excerpt{margin-top:9px;color:#3c3c3d;font-size:12.5px;line-height:1.65;opacity:1}',
+      '.dsh-cn-taiji .dsh-cn-close{color:#8a8a8c}',
+      '.dsh-cn-taiji .dsh-cn-close:hover{background:rgba(0,0,0,.07);color:#111}',
+      // 阴面: an error turns the card inside out — same shapes, inverted ground.
+      '.dsh-cn-card.dsh-cn-taiji[data-tone="error"]{--dsh-cn-inkc:#f3f1ec;--dsh-cn-paperc:#141416;',
+      'box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.10),',
+      '0 2px 6px rgba(0,0,0,.28),0 20px 44px -18px rgba(0,0,0,.66)}',
+      '.dsh-cn-taiji[data-tone="error"] .dsh-cn-head{border-bottom-color:rgba(255,255,255,.12)}',
+      '.dsh-cn-taiji[data-tone="error"] .dsh-cn-meta{color:#9a9a9c}',
+      '.dsh-cn-taiji[data-tone="error"] .dsh-cn-excerpt{color:#cfcdc7}',
+      '.dsh-cn-taiji[data-tone="error"] .dsh-cn-close{color:#8f8f91}',
+      '.dsh-cn-taiji[data-tone="error"] .dsh-cn-close:hover{background:rgba(255,255,255,.10);color:#fff}',
+      '.dsh-cn-taiji[data-leaving="1"]{animation:dsh-cn-out .18s ease forwards}',
       '.dsh-cn-card[data-leaving="1"]{animation:dsh-cn-out .16s ease forwards}',
       '@keyframes dsh-cn-in{from{opacity:0;transform:translate3d(0,-6px,0)}to{opacity:1;transform:none}}',
       '@keyframes dsh-cn-out{to{opacity:0;transform:translate3d(0,-4px,0)}}',
       '@media (prefers-reduced-motion:reduce){.dsh-cn-card{animation:none}}',
     ].join('')
+
+    /** Card skins this half can draw; anything else falls back to ink. */
+    const STYLES = {
+      ink: 'dsh-cn-card dsh-cn-ink',
+      taiji: 'dsh-cn-card dsh-cn-taiji',
+    }
+
+    /** Yin-yang mark for the taiji skin; colours come from CSS variables. */
+    function taijiGlyph() {
+      return h(
+        'svg',
+        { viewBox: '0 0 24 24', 'aria-hidden': 'true', focusable: 'false' },
+        h('circle', { cx: 12, cy: 12, r: 10, fill: 'var(--dsh-cn-paperc)' }),
+        h('path', { d: 'M12 2a10 10 0 0 0 0 20 5 5 0 0 0 0-10 5 5 0 0 1 0-10z', fill: 'var(--dsh-cn-inkc)' }),
+        h('circle', { cx: 12, cy: 7, r: 2, fill: 'var(--dsh-cn-paperc)' }),
+        h('circle', { cx: 12, cy: 17, r: 2, fill: 'var(--dsh-cn-inkc)' }),
+        h('circle', {
+          cx: 12,
+          cy: 12,
+          r: 9.4,
+          fill: 'none',
+          stroke: 'var(--dsh-cn-inkc)',
+          strokeWidth: 1,
+        }),
+      )
+    }
 
     function pickCopy(ctx) {
       let id = ''
@@ -225,7 +317,7 @@ window.__ModuleLoader__.load({
       return h(
         'div',
         {
-          className: 'dsh-cn-card',
+          className: STYLES[item.style] || STYLES.ink,
           'data-tone': tone,
           'data-leaving': leaving ? '1' : undefined,
           role: 'status',
@@ -237,6 +329,9 @@ window.__ModuleLoader__.load({
           h(
             'div',
             { className: 'dsh-cn-head' },
+            h('span', { className: 'dsh-cn-dot', 'aria-hidden': 'true' }),
+            h('span', { className: 'dsh-cn-seal', 'aria-hidden': 'true' }, SEAL[kind] || SEAL.unknown),
+            h('span', { className: 'dsh-cn-glyph', 'aria-hidden': 'true' }, taijiGlyph()),
             h('div', { className: 'dsh-cn-title' }, item.title ? String(item.title) : copy[kind]),
             meta ? h('div', { className: 'dsh-cn-meta', title: meta }, meta) : null,
           ),

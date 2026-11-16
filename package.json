@@ -1,6 +1,6 @@
 {
   "name": "dsh-completion-chime",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Rings a chime and pops a card when your turn finishes. Bring your own rings.",
   "license": "MIT",
   "author": "李桂宁",

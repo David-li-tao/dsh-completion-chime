@@ -51,6 +51,8 @@ const DEFAULTS = {
   agentTool: true,
   /** Collapse several turns ending this close together into one notice, ms. */
   coalesceMs: 800,
+  /** Card skins; one is picked per notice, never the same twice in a row. */
+  cardStyles: ['ink', 'taiji'],
   /** Characters of the reply carried into the card; 0 turns the excerpt off. */
   excerptChars: 90,
 }
@@ -60,6 +62,20 @@ const SILENT_REASONS = new Set(['aborted', 'interrupted', 'forked'])
 
 /** Last sound played, so a random pick never repeats back to back. */
 let lastSound = ''
+
+/** Last card skin used, for the same reason. */
+let lastStyle = ''
+
+/** Pick one card skin, never the same one twice in a row. */
+function pickStyle(styles) {
+  const list = Array.isArray(styles) ? styles.filter((name) => typeof name === 'string' && name) : []
+  if (list.length === 0) return 'ink'
+  if (list.length === 1) return list[0]
+  const pool = list.filter((name) => name !== lastStyle)
+  const choice = pool[Math.floor(Math.random() * pool.length)] ?? list[0]
+  lastStyle = choice
+  return choice
+}
 
 /**
  * `soundName` may be one name or a list. With a list the chime rotates at
@@ -181,6 +197,7 @@ export function apply(ctx, config) {
       durationMs: extra?.durationMs ?? 0,
       excerpt: extra?.excerpt ?? '',
       title: extra?.title ?? '',
+      style: extra?.style || pickStyle(options.cardStyles),
     }
     notices.push(notice)
     if (notices.length > MAX_KEPT) notices.splice(0, notices.length - MAX_KEPT)
