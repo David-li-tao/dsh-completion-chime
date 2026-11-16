@@ -3,6 +3,15 @@
   "version": "2.0.0",
   "description": "Rings a chime and pops a card when your turn finishes. Bring your own rings.",
   "license": "MIT",
+  "author": "李桂宁",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/David-li-tao/dsh-completion-chime.git"
+  },
+  "homepage": "https://github.com/David-li-tao/dsh-completion-chime#readme",
+  "bugs": {
+    "url": "https://github.com/David-li-tao/dsh-completion-chime/issues"
+  },
   "type": "module",
   "exports": {
     ".": "./index.js",
