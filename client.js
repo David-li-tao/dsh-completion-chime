@@ -150,11 +150,20 @@ window.__ModuleLoader__.load({
       '.dsh-cn-ink[data-leaving="1"]{animation:dsh-cn-out .2s ease forwards}',
       // ── 太极 taiji: one monochrome card, and an error flips yin and yang ───
       '.dsh-cn-glyph{display:none}',
+      // 阴 / 阳 in one card: ink masses blurred until they melt into the paper,
+      // with a pale counter-lobe so the black and white read as intermingled
+      // rather than as two halves. Text sits on the paper side of the wash.
       '.dsh-cn-card.dsh-cn-taiji{--dsh-cn-inkc:#0f0f11;--dsh-cn-paperc:#fbfaf6;',
       'width:330px;padding:14px 16px 15px;border-radius:10px;',
-      'background:var(--dsh-cn-paperc);color:var(--dsh-cn-inkc);',
+      'background-color:#f7f5ef;',
+      // Scrim first: the ink is free to go as dark as it likes on the right and
+      // bottom edges, while the column the text occupies stays paper.
+      'background-image:linear-gradient(96deg,#f7f5ef 0%,#f7f5ef 50%,rgba(247,245,239,.62) 72%,rgba(247,245,239,0) 96%),',
+      'url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'360\' height=\'200\' viewBox=\'0 0 360 200\'><defs><filter id=\'b\' x=\'-40%\' y=\'-40%\' width=\'180%\' height=\'180%\'><feGaussianBlur stdDeviation=\'26\'/></filter></defs><g filter=\'url(%23b)\'><ellipse cx=\'388\' cy=\'132\' rx=\'152\' ry=\'150\' fill=\'%230c0c0f\' opacity=\'0.64\'/><ellipse cx=\'290\' cy=\'238\' rx=\'118\' ry=\'96\' fill=\'%230c0c0f\' opacity=\'0.5\'/><ellipse cx=\'176\' cy=\'-22\' rx=\'76\' ry=\'42\' fill=\'%230c0c0f\' opacity=\'0.16\'/><ellipse cx=\'248\' cy=\'70\' rx=\'42\' ry=\'30\' fill=\'%23ffffff\' opacity=\'0.55\'/></g></svg>");',
+      'background-repeat:no-repeat;background-size:100% 100%;',
+      'color:var(--dsh-cn-inkc);',
       'backdrop-filter:none;-webkit-backdrop-filter:none;',
-      'box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.85),',
+      'box-shadow:inset 0 0 0 1px rgba(0,0,0,.10),inset 0 1px 0 rgba(255,255,255,.9),',
       '0 2px 6px rgba(0,0,0,.10),0 18px 40px -18px rgba(0,0,0,.46);',
       'animation:dsh-cn-in .22s cubic-bezier(.2,.75,.3,1) both}',
       '.dsh-cn-taiji .dsh-cn-head{align-items:center;gap:9px;padding-bottom:9px;',
@@ -164,12 +173,16 @@ window.__ModuleLoader__.load({
       '.dsh-cn-taiji .dsh-cn-glyph svg{display:block;width:20px;height:20px}',
       '.dsh-cn-taiji .dsh-cn-title{font-size:13.5px;font-weight:600;letter-spacing:.02em;',
       'color:var(--dsh-cn-inkc)}',
-      '.dsh-cn-taiji .dsh-cn-meta{color:#6f6f70;font-size:10.5px;letter-spacing:.02em}',
+      '.dsh-cn-taiji .dsh-cn-meta{color:#58585a;font-size:10.5px;letter-spacing:.02em}',
       '.dsh-cn-taiji .dsh-cn-excerpt{margin-top:9px;color:#3c3c3d;font-size:12.5px;line-height:1.65;opacity:1}',
       '.dsh-cn-taiji .dsh-cn-close{color:#8a8a8c}',
       '.dsh-cn-taiji .dsh-cn-close:hover{background:rgba(0,0,0,.07);color:#111}',
       // 阴面: an error turns the card inside out — same shapes, inverted ground.
       '.dsh-cn-card.dsh-cn-taiji[data-tone="error"]{--dsh-cn-inkc:#f3f1ec;--dsh-cn-paperc:#141416;',
+      'background-color:#121214;',
+      'background-image:radial-gradient(70% 95% at 16% 104%,rgba(255,255,255,.18),transparent 62%),',
+      'radial-gradient(72% 92% at 88% -4%,rgba(255,255,255,.12),transparent 58%),',
+      'radial-gradient(60% 80% at 52% 50%,rgba(255,255,255,.04),transparent 70%);',
       'box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 1px 0 rgba(255,255,255,.10),',
       '0 2px 6px rgba(0,0,0,.28),0 20px 44px -18px rgba(0,0,0,.66)}',
       '.dsh-cn-taiji[data-tone="error"] .dsh-cn-head{border-bottom-color:rgba(255,255,255,.12)}',
